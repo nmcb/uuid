@@ -27,7 +27,7 @@ object UUIDProps extends Properties("uuid.UUID"):
       case Some(RandomBased)      =>  (msb & 0xF000L) == 0x4000L
       case Some(SHA1HashBased)    =>  (msb & 0xF000L) == 0x5000L
       case Some(ISO3166Based)     =>  (msb & 0xF000L) == 0x6000L
-      case None                   => ((msb & 0xF000L) == 0x0000L) || ((msb & 0xF000L) >= 0x6000L)
+      case None                   => ((msb & 0xF000L) == 0x0000L) || ((msb & 0xF000L) >= 0x7000L)
   }
 
   property("iso3166") = forAll(sourcesAndTargets) { (source: String, target: String) =>
