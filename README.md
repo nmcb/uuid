@@ -1,2 +1,2 @@
-# uuid
-An Universally Unique Identifier in the age of ubiquitous communication
+# UUID
+A Universally Unique (Physical) Identifier for an Age of Ubiquitous Digital Communication.
