@@ -1,9 +1,17 @@
 object uuid:
 
+  import java.util.Locale
+
   case class UUID(msb: Long, lsb: Long):
 
     import Variant.*
     import Version.*
+
+    def source: String =
+      ???
+
+    def target: String =
+      ???
 
     val variant: Variant =
       ((lsb >>> 61) & 0x07) match
@@ -39,7 +47,6 @@ object uuid:
     case RandomBased
     case SHA1HashBased
     case ISO3166Based
-
 
   object compat:
 
