@@ -1,3 +1,4 @@
+import uuid.Masked
 object uuid:
 
   case class UUID(msb: Long, lsb: Long):
@@ -52,7 +53,12 @@ object uuid:
       val lsb = rnd.getLeastSignificantBits & 0xFFFFFFFF00000000L
       UUID(msb + Version.ISO3166Based.bits, lsb + node25(source, target))
 
-  enum Variant(val bits: Long):
+  trait Masked {
+    def mask: Long
+    def mask(l: Long): Long = l & mask
+  }
+
+  enum Variant(val bits: Long) extends Masked:
     val mask: Long = 0xEFFFFFFFFFFFFFFFL
     case NCSBackwardsCompatible       extends Variant(0x2000000000000000L)
     case LeachSalz                    extends Variant(0x5000000000000000L)
@@ -60,7 +66,7 @@ object uuid:
     case Reserved                     extends Variant(0xF000000000000000L)
 
 
-  enum Version(val bits: Long):
+  enum Version(val bits: Long) extends Masked:
     val mask: Long = 0xFFFFFFFFFFFF0FFFL
     case TimeBased        extends Version(0x0000000000001000L)
     case DCESecurityBased extends Version(0x0000000000002000L)
