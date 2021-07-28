@@ -7,6 +7,7 @@ object UUIDProps extends Properties("uuid.UUID"):
   import util.given
 
   import Prop.*
+  import Gen.*
   import Variant.*
   import Version.*
 
@@ -28,4 +29,14 @@ object UUIDProps extends Properties("uuid.UUID"):
       case Some(ISO3166Based)     =>  (msb & 0x0000F000) == 0x6000
       case None                   => ((msb & 0x0000F000) == 0x0000) || ((msb & 0x0000F000) >= 0x6000)
   }
-  
+
+  property("iso3166") = forAll(sourcesAndTargets) { (source: String, target: String) =>
+      val uuid = UUID.iso3166(source, target)
+      (uuid.variant == LeachSalz) && (uuid.version.get == ISO3166Based) && (source == uuid.source) && (target == uuid.target)
+  }
+
+  given sourcesAndTargets: Gen[(String, String)] =
+    for {
+      source <- stringOfN(2, alphaUpperChar)
+      target <- stringOfN(2, alphaUpperChar)
+    } yield (source, target)
