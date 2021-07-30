@@ -408,6 +408,11 @@ RFC 4122                  A UUID URN Namespace                 July 2005
                                      specified in this document
                                      that uses SHA-1 hashing.
 
+    0     1     1     0        6     The ISO-3166-based version
+                                     specified in this document
+                                     that uses 2 charcter country
+                                     codes.
+
    The version is more accurately a sub-type; again, we retain the term
    for compatibility.
 
@@ -490,6 +495,10 @@ RFC 4122                  A UUID URN Namespace                 July 2005
 
    For UUID version 4, the node field is a randomly or pseudo-randomly
    generated 48-bit value as described in Section 4.4.
+
+   For UUID version 6, the 4 least significant bytes of the node field,
+   identified by node 2 till 5 are constructed from the UUID's 2 times 2
+   character upper-case country codes respectively.
 
 4.1.7.  Nil UUID
 
