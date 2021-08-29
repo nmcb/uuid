@@ -410,7 +410,7 @@ RFC 4122                  A UUID URN Namespace                 July 2005
 
     0     1     1     0        6     The ISO-3166-based version
                                      specified in this document
-                                     that uses 2 charcter country
+                                     that uses 2 character country
                                      codes.
 
    The version is more accurately a sub-type; again, we retain the term
