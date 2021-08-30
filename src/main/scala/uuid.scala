@@ -6,17 +6,7 @@ object uuid:
     import Variant.*
     import Version.*
 
-    val target: String =
-      val node5 = (lsb & 0x0000_0000_0000_001f) + 0x41
-      val node4 = ((lsb >>>  5) & 0x0000_0000_0000_001f) + 0x41
-      String(Array(node4.toByte, node5.toByte), "US-ASCII")
-
-    val source: String =
-      val node3 = ((lsb >>> 10) & 0x0000_0000_0000_001f) + 0x41
-      val node2 = ((lsb >>> 15) & 0x0000_0000_0000_001f) + 0x41
-      String(Array(node2.toByte, node3.toByte), "US-ASCII")
-
-    val variant: Variant =
+    def variant: Variant =
       ((lsb >>> 61) & 0x0000_0000_0000_0007) match
         case 0x00 => NCSBackwardsCompatible
         case 0x01 => NCSBackwardsCompatible
@@ -27,7 +17,7 @@ object uuid:
         case 0x06 => MicrosoftBackwardsCompatible
         case 0x07 => Reserved
 
-    val version: Option[Version] =
+    def version: Option[Version] =
       ((msb >>> 12) & 0x0000_0000_0000_000f) match
         case 0x01 => Some(TimeBased)
         case 0x02 => Some(DCESecurityBased)
@@ -37,12 +27,28 @@ object uuid:
         case 0x06 => Some(ISO3166Based)
         case _    => None
 
+    def sourceCountryCode: Option[String] =
+      Option.when(version.contains(ISO3166Based))(UUID.source(lsb))
+
+    def targetCountryCode: Option[String] =
+      Option.when(version.contains(ISO3166Based))(UUID.target(lsb))
+
   object UUID:
 
-    private def node25(source: String, target: String): Long =
+    def target(lsb: Long): String =
+      val node5 = (lsb & 0x0000_0000_0000_001f) + 0x41
+      val node4 = ((lsb >>>  5) & 0x0000_0000_0000_001f) + 0x41
+      String(Array(node4.toByte, node5.toByte), "US-ASCII")
+
+    def source(lsb: Long): String =
+      val node3 = ((lsb >>> 10) & 0x0000_0000_0000_001f) + 0x41
+      val node2 = ((lsb >>> 15) & 0x0000_0000_0000_001f) + 0x41
+      String(Array(node2.toByte, node3.toByte), "US-ASCII")
+
+    private def encode(source: String, target: String)(lsb: Long): Long =
       val scode = source.getBytes("US-ASCII").foldLeft(0L)((a,b) => (a << 5) + ((b - 0x41) & 0x1f)) << 10
       val tcode = target.getBytes("US-ASCII").foldLeft(0L)((a,b) => (a << 5) + ((b - 0x41) & 0x1f))
-      scode + tcode
+      (lsb & 0xffff_ffff_fff0_0000L) + scode + tcode
 
     def iso3166(source: String, target: String): UUID =
       assert(source.matches("[A-Z][A-Z]"), s"invalid source country code: $source")
@@ -50,8 +56,7 @@ object uuid:
 
       val rnd = java.util.UUID.randomUUID
       val msb = rnd.getMostSignificantBits  & 0xFFFFFFFFFFFF0FFFL
-      val lsb = rnd.getLeastSignificantBits & 0xFFFFFFFF00000000L
-      UUID(msb + Version.ISO3166Based.bits, lsb + node25(source, target))
+      UUID(msb + Version.ISO3166Based.bits, encode(source, target)(rnd.getLeastSignificantBits))
 
   trait Masked {
     def mask: Long

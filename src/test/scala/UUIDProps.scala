@@ -34,7 +34,7 @@ object UUIDProps extends Properties("uuid.UUID"):
       val uuid = UUID.iso3166(source, target)
 
       val correctType = (uuid.variant == LeachSalz) && (uuid.version.get == ISO3166Based)
-      val correctData = (source == uuid.source) && (target == uuid.target)
+      val correctData = (uuid.sourceCountryCode.get == source) && (uuid.targetCountryCode.get == target)
       correctType && correctData
   }
 
