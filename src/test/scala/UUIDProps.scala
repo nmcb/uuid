@@ -39,7 +39,11 @@ object UUIDProps extends Properties("uuid.UUID"):
   }
 
   val sourcesAndTargets: Gen[(String, String)] =
+    val isoCountryPart1Alpha2Code: Gen[String] =
+      import java.util.Locale
+      import scala.jdk.CollectionConverters._
+      Gen.oneOf(Locale.getISOCountries(Locale.IsoCountryCode.PART1_ALPHA2).asScala)
     for {
-      source <- stringOfN(2, alphaUpperChar)
-      target <- stringOfN(2, alphaUpperChar)
+      source <- isoCountryPart1Alpha2Code
+      target <- isoCountryPart1Alpha2Code
     } yield (source, target)
