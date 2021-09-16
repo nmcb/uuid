@@ -3,11 +3,10 @@ import org.scalacheck.*
 object UUIDProps extends Properties("uuid.UUID"):
 
   import uuid.*
+
   import util.*
   import util.given
-
   import Prop.*
-  import Gen.*
   import Variant.*
   import Version.*
 
