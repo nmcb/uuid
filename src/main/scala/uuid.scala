@@ -84,6 +84,10 @@ object uuid:
 
     type JavaUUID = java.util.UUID
 
+    object JavaUUID:
+      def apply(msb: Long, lsb: Long): JavaUUID =
+        java.util.UUID.apply(msb, lsb)
+
     trait Dec[A]:
       extension (a: A) def decode: Option[UUID]
 
