@@ -1,6 +1,7 @@
 package identification
 
 import uuid.Masked
+
 object uuid:
 
   case class UUID(msb: Long, lsb: Long):

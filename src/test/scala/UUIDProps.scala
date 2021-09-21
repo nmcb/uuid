@@ -1,3 +1,5 @@
+package identification
+
 import org.scalacheck.*
 
 object UUIDProps extends Properties("uuid.UUID"):
