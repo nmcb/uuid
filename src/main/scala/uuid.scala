@@ -1,3 +1,5 @@
+package identification
+
 import uuid.Masked
 object uuid:
 
