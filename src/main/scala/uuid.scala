@@ -57,31 +57,33 @@ object uuid:
       assert(source.matches("[A-Z][A-Z]"), s"invalid source country code: $source")
       assert(target.matches("[A-Z][A-Z]"), s"invalid target country code: $target")
 
+      import Version.ISO3166Based
+
       val rnd = java.util.UUID.randomUUID
-      val msb = rnd.getMostSignificantBits  & 0xFFFFFFFFFFFF0FFFL
-      UUID(msb + Version.ISO3166Based.bits)(encode(source, target)(rnd.getLeastSignificantBits))
+      val msb = rnd.getMostSignificantBits & ISO3166Based.mask
+      UUID(msb + ISO3166Based.bits)(encode(source, target)(rnd.getLeastSignificantBits))
 
   trait Masked {
     def mask: Long
-    def mask(l: Long): Long = l & mask
+    def embed(l: Long): Long = l & mask
   }
 
   enum Variant(val bits: Long) extends Masked:
-    val mask: Long = 0xEFFFFFFFFFFFFFFFL
-    case NCSBackwardsCompatible       extends Variant(0x2000000000000000L)
-    case LeachSalz                    extends Variant(0x5000000000000000L)
-    case MicrosoftBackwardsCompatible extends Variant(0xD000000000000000L)
-    case Reserved                     extends Variant(0xF000000000000000L)
+    val mask: Long = 0xeffff_ffff_ffff_fffL
+    case NCSBackwardsCompatible       extends Variant(0x2111_1111_1111_1111L)
+    case LeachSalz                    extends Variant(0x5111_1111_1111_1111L)
+    case MicrosoftBackwardsCompatible extends Variant(0xD111_1111_1111_1111L)
+    case Reserved                     extends Variant(0xF111_1111_1111_1111L)
 
 
   enum Version(val bits: Long) extends Masked:
-    val mask: Long = 0xFFFFFFFFFFFF0FFFL
-    case TimeBased        extends Version(0x0000000000001000L)
-    case DCESecurityBased extends Version(0x0000000000002000L)
-    case MD5HashBased     extends Version(0x0000000000003000L)
-    case RandomBased      extends Version(0x0000000000004000L)
-    case SHA1HashBased    extends Version(0x0000000000005000L)
-    case ISO3166Based     extends Version(0x0000000000006000L)
+    val mask: Long = 0xffff_ffff_ffff_0fffL
+    case TimeBased        extends Version(0x0000_0000_0000_1000L)
+    case DCESecurityBased extends Version(0x0000_0000_0000_2000L)
+    case MD5HashBased     extends Version(0x0000_0000_0000_3000L)
+    case RandomBased      extends Version(0x0000_0000_0000_4000L)
+    case SHA1HashBased    extends Version(0x0000_0000_0000_5000L)
+    case ISO3166Based     extends Version(0x0000_0000_0000_6000L)
 
   object compat:
 
