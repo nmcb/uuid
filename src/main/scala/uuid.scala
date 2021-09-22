@@ -4,7 +4,7 @@ import uuid.Masked
 
 object uuid:
 
-  case class UUID(msb: Long, lsb: Long):
+  case class UUID(msb: Long)(lsb: Long):
 
     import Variant.*
     import Version.*
@@ -59,7 +59,7 @@ object uuid:
 
       val rnd = java.util.UUID.randomUUID
       val msb = rnd.getMostSignificantBits  & 0xFFFFFFFFFFFF0FFFL
-      UUID(msb + Version.ISO3166Based.bits, encode(source, target)(rnd.getLeastSignificantBits))
+      UUID(msb + Version.ISO3166Based.bits)(encode(source, target)(rnd.getLeastSignificantBits))
 
   trait Masked {
     def mask: Long
@@ -95,4 +95,4 @@ object uuid:
       extension (a: A) def decode: Option[UUID]
 
     given Dec[JavaUUID] =
-      (uuid: JavaUUID) => Some(UUID(uuid.getMostSignificantBits, uuid.getLeastSignificantBits))
+      (uuid: JavaUUID) => Some(UUID(uuid.getMostSignificantBits)(uuid.getLeastSignificantBits))

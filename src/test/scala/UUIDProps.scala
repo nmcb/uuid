@@ -13,7 +13,7 @@ object UUIDProps extends Properties("uuid.UUID"):
   import Version.*
 
   property("variant") = forAll { (msb: Long, lsb: Long) =>
-    UUID(msb,lsb).variant match
+    UUID(msb)(lsb).variant match
       case Reserved                     => lsb.toBinaryString.startsWith("111")
       case MicrosoftBackwardsCompatible => lsb.toBinaryString.startsWith("110")
       case LeachSalz                    => lsb.toBinaryString.startsWith("10")
@@ -21,7 +21,7 @@ object UUIDProps extends Properties("uuid.UUID"):
   }
 
   property("version") = forAll { (msb: Long, lsb: Long) =>
-    UUID(msb,lsb).version match
+    UUID(msb)(lsb).version match
       case Some(TimeBased)        =>  (msb & 0xF000L) == 0x1000L
       case Some(DCESecurityBased) =>  (msb & 0xF000L) == 0x2000L
       case Some(MD5HashBased)     =>  (msb & 0xF000L) == 0x3000L
