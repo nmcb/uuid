@@ -2,6 +2,7 @@ package identification
 
 case class UUID(msb: Long)(lsb: Long):
 
+  import UUID.*
   import Variant.*
   import Version.*
 
@@ -27,19 +28,19 @@ case class UUID(msb: Long)(lsb: Long):
       case _    => None
 
   def sourceCountryCode: Option[String] =
-    Option.when(version.contains(ISO3166Based))(UUID.source(lsb))
+    Option.when(version.contains(ISO3166Based))(decodeSource(lsb))
 
   def targetCountryCode: Option[String] =
-    Option.when(version.contains(ISO3166Based))(UUID.target(lsb))
+    Option.when(version.contains(ISO3166Based))(decodeTarget(lsb))
 
 object UUID:
 
-  def target(lsb: Long): String =
+  def decodeTarget(lsb: Long): String =
     val node5 = (lsb & 0x0000_0000_0000_001f) + 0x41
     val node4 = ((lsb >>>  5) & 0x0000_0000_0000_001f) + 0x41
     String(Array(node4.toByte, node5.toByte), "US-ASCII")
 
-  def source(lsb: Long): String =
+  def decodeSource(lsb: Long): String =
     val node3 = ((lsb >>> 10) & 0x0000_0000_0000_001f) + 0x41
     val node2 = ((lsb >>> 15) & 0x0000_0000_0000_001f) + 0x41
     String(Array(node2.toByte, node3.toByte), "US-ASCII")
