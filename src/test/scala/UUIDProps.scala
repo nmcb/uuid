@@ -4,7 +4,7 @@ import org.scalacheck.*
 
 object UUIDProps extends Properties("uuid.UUID"):
 
-  import uuid.*
+  import identification.*
 
   import util.*
   import util.given
@@ -40,11 +40,10 @@ object UUIDProps extends Properties("uuid.UUID"):
   }
 
   val sourcesAndTargets: Gen[(String, String)] =
-    val isoCountryPart1Alpha2Code: Gen[String] =
-      import java.util.Locale
-      import scala.jdk.CollectionConverters._
-      Gen.oneOf(Locale.getISOCountries(Locale.IsoCountryCode.PART1_ALPHA2).asScala)
+
+    import compat.JavaIsoCountryCodes
+
     for {
-      source <- isoCountryPart1Alpha2Code
-      target <- isoCountryPart1Alpha2Code
+      source <- Gen.oneOf(JavaIsoCountryCodes)
+      target <- Gen.oneOf(JavaIsoCountryCodes)
     } yield (source, target)

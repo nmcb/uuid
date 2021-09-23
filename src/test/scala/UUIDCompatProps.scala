@@ -6,7 +6,7 @@ object UUIDCompatProps extends Properties("uuid.compat"):
 
   import Prop._
 
-  import uuid.*
+  import identification.*
   import Variant.*
   import Version.*
   
