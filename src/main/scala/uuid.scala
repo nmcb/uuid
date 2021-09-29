@@ -1,6 +1,6 @@
 package identification
 
-case class UUID(msb: Long)(lsb: Long):
+case class UUID(msb: Long, lsb: Long):
 
   import UUID.*
   import Variant.*
@@ -27,36 +27,36 @@ case class UUID(msb: Long)(lsb: Long):
       case 0x06 => Some(ISO3166Based)
       case _    => None
 
-  def sourceCountryCode: Option[IsoCountryCode] =
+  def sourceCountryCode: Option[CountryCode] =
     Option.when(version.contains(ISO3166Based))(decodeSource(lsb))
 
-  def targetCountryCode: Option[IsoCountryCode] =
+  def targetCountryCode: Option[CountryCode] =
     Option.when(version.contains(ISO3166Based))(decodeTarget(lsb))
 
 object UUID:
 
-  case class IsoCountryCode(isoPart1Alpha2: String)
+  case class CountryCode(isoPart1Alpha2: String)
 
-  object IsoCountryCode:
-    def apply(msb: Byte, lsb: Byte): IsoCountryCode =
-      IsoCountryCode(String(Array(msb, lsb), "US-ASCII"))
+  object CountryCode:
+    def apply(msb: Byte, lsb: Byte): CountryCode =
+      CountryCode(String(Array(msb, lsb), "US-ASCII"))
 
-  def decodeTarget(lsb: Long): IsoCountryCode =
+  def decodeTarget(lsb: Long): CountryCode =
     val node5 = (lsb & 0x0000_0000_0000_001f) + 0x41
     val node4 = ((lsb >>>  5) & 0x0000_0000_0000_001f) + 0x41
-    IsoCountryCode(node4.toByte, node5.toByte)
+    CountryCode(node4.toByte, node5.toByte)
 
-  def decodeSource(lsb: Long): IsoCountryCode =
+  def decodeSource(lsb: Long): CountryCode =
     val node3 = ((lsb >>> 10) & 0x0000_0000_0000_001f) + 0x41
     val node2 = ((lsb >>> 15) & 0x0000_0000_0000_001f) + 0x41
-    IsoCountryCode(node2.toByte, node3.toByte)
+    CountryCode(node2.toByte, node3.toByte)
 
-  private def encode(source: IsoCountryCode, target: IsoCountryCode)(lsb: Long): Long =
+  private def encode(source: CountryCode, target: CountryCode)(lsb: Long): Long =
     val scode = source.isoPart1Alpha2.getBytes("US-ASCII").foldLeft(0L)((a,b) => (a << 5) + ((b - 0x41) & 0x1f)) << 10
     val tcode = target.isoPart1Alpha2.getBytes("US-ASCII").foldLeft(0L)((a,b) => (a << 5) + ((b - 0x41) & 0x1f))
     (lsb & 0xffff_ffff_fff0_0000L) + scode + tcode
 
-  def iso3166(source: IsoCountryCode, target: IsoCountryCode): UUID =
+  def iso3166(source: CountryCode, target: CountryCode): UUID =
     assert(source.isoPart1Alpha2.matches("[A-Z][A-Z]"), s"invalid source country code: $source")
     assert(target.isoPart1Alpha2.matches("[A-Z][A-Z]"), s"invalid target country code: $target")
 
@@ -64,7 +64,7 @@ object UUID:
 
     val rnd = java.util.UUID.randomUUID
     val msb = rnd.getMostSignificantBits & ISO3166Based.mask
-    UUID(msb + ISO3166Based.bits)(encode(source, target)(rnd.getLeastSignificantBits))
+    UUID(msb + ISO3166Based.bits, encode(source, target)(rnd.getLeastSignificantBits))
 
 trait Masked {
   def mask: Long
@@ -96,13 +96,16 @@ object compat:
     def apply(msb: Long, lsb: Long): JavaUUID =
       java.util.UUID.apply(msb, lsb)
 
+  extension (uuid: UUID) def javaUUID: JavaUUID =
+    JavaUUID(uuid.msb, uuid.lsb)
+
   trait Dec[A]:
-    extension (a: A) def decode: Option[UUID]
+    extension (a: A) def asScala: Some[UUID]
 
   given Dec[JavaUUID] =
-    (uuid: JavaUUID) => Some(UUID(uuid.getMostSignificantBits)(uuid.getLeastSignificantBits))
+    (uuid: JavaUUID) => Some(UUID(uuid.getMostSignificantBits, uuid.getLeastSignificantBits))
 
-  val JavaIsoCountryCodes: Set[String] =
+  val JavaCountryCodes: Set[String] =
     import java.util.Locale
     import scala.jdk.CollectionConverters._
     Locale.getISOCountries(Locale.IsoCountryCode.PART1_ALPHA2).asScala.toSet

@@ -1,7 +1,7 @@
 package identification
 
 import org.scalacheck.*
-import identification.UUID.IsoCountryCode
+import identification.UUID.CountryCode
 
 object UUIDProps extends Properties("uuid.UUID"):
 
@@ -14,7 +14,7 @@ object UUIDProps extends Properties("uuid.UUID"):
   import Version.*
 
   property("variant") = forAll { (msb: Long, lsb: Long) =>
-    UUID(msb)(lsb).variant match
+    UUID(msb, lsb).variant match
       case Reserved                     => lsb.toBinaryString.startsWith("111")
       case MicrosoftBackwardsCompatible => lsb.toBinaryString.startsWith("110")
       case LeachSalz                    => lsb.toBinaryString.startsWith("10")
@@ -22,7 +22,7 @@ object UUIDProps extends Properties("uuid.UUID"):
   }
 
   property("version") = forAll { (msb: Long, lsb: Long) =>
-    UUID(msb)(lsb).version match
+    UUID(msb, lsb).version match
       case Some(TimeBased)        =>  (msb & 0xF000L) == 0x1000L
       case Some(DCESecurityBased) =>  (msb & 0xF000L) == 0x2000L
       case Some(MD5HashBased)     =>  (msb & 0xF000L) == 0x3000L
@@ -32,7 +32,7 @@ object UUIDProps extends Properties("uuid.UUID"):
       case None                   => ((msb & 0xF000L) == 0x0000L) || ((msb & 0xF000L) >= 0x7000L)
   }
 
-  property("iso3166") = forAll(isoSourcesAndTargets) { (source: IsoCountryCode, target: IsoCountryCode) =>
+  property("iso3166") = forAll(isoSourcesAndTargets) { (source: CountryCode, target: CountryCode) =>
       val uuid = UUID.iso3166(source, target)
 
       val correctType = (uuid.variant == LeachSalz) && (uuid.version.get == ISO3166Based)
@@ -40,11 +40,11 @@ object UUIDProps extends Properties("uuid.UUID"):
       correctType && correctData
   }
 
-  val isoSourcesAndTargets: Gen[(IsoCountryCode, IsoCountryCode)] =
+  val isoSourcesAndTargets: Gen[(CountryCode, CountryCode)] =
 
-    import compat.JavaIsoCountryCodes
+    import compat.JavaCountryCodes
 
     for {
-      source <- Gen.oneOf(JavaIsoCountryCodes).map(IsoCountryCode.apply)
-      target <- Gen.oneOf(JavaIsoCountryCodes).map(IsoCountryCode.apply)
+      source <- Gen.oneOf(JavaCountryCodes).map(CountryCode.apply)
+      target <- Gen.oneOf(JavaCountryCodes).map(CountryCode.apply)
     } yield (source, target)
