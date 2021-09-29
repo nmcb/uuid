@@ -27,32 +27,38 @@ case class UUID(msb: Long)(lsb: Long):
       case 0x06 => Some(ISO3166Based)
       case _    => None
 
-  def sourceCountryCode: Option[String] =
+  def sourceCountryCode: Option[IsoCountryCode] =
     Option.when(version.contains(ISO3166Based))(decodeSource(lsb))
 
-  def targetCountryCode: Option[String] =
+  def targetCountryCode: Option[IsoCountryCode] =
     Option.when(version.contains(ISO3166Based))(decodeTarget(lsb))
 
 object UUID:
 
-  def decodeTarget(lsb: Long): String =
+  case class IsoCountryCode(isoPart1Alpha2: String)
+
+  object IsoCountryCode:
+    def apply(msb: Byte, lsb: Byte): IsoCountryCode =
+      IsoCountryCode(String(Array(msb, lsb), "US-ASCII"))
+
+  def decodeTarget(lsb: Long): IsoCountryCode =
     val node5 = (lsb & 0x0000_0000_0000_001f) + 0x41
     val node4 = ((lsb >>>  5) & 0x0000_0000_0000_001f) + 0x41
-    String(Array(node4.toByte, node5.toByte), "US-ASCII")
+    IsoCountryCode(node4.toByte, node5.toByte)
 
-  def decodeSource(lsb: Long): String =
+  def decodeSource(lsb: Long): IsoCountryCode =
     val node3 = ((lsb >>> 10) & 0x0000_0000_0000_001f) + 0x41
     val node2 = ((lsb >>> 15) & 0x0000_0000_0000_001f) + 0x41
-    String(Array(node2.toByte, node3.toByte), "US-ASCII")
+    IsoCountryCode(node2.toByte, node3.toByte)
 
-  private def encode(source: String, target: String)(lsb: Long): Long =
-    val scode = source.getBytes("US-ASCII").foldLeft(0L)((a,b) => (a << 5) + ((b - 0x41) & 0x1f)) << 10
-    val tcode = target.getBytes("US-ASCII").foldLeft(0L)((a,b) => (a << 5) + ((b - 0x41) & 0x1f))
+  private def encode(source: IsoCountryCode, target: IsoCountryCode)(lsb: Long): Long =
+    val scode = source.isoPart1Alpha2.getBytes("US-ASCII").foldLeft(0L)((a,b) => (a << 5) + ((b - 0x41) & 0x1f)) << 10
+    val tcode = target.isoPart1Alpha2.getBytes("US-ASCII").foldLeft(0L)((a,b) => (a << 5) + ((b - 0x41) & 0x1f))
     (lsb & 0xffff_ffff_fff0_0000L) + scode + tcode
 
-  def iso3166(source: String, target: String): UUID =
-    assert(source.matches("[A-Z][A-Z]"), s"invalid source country code: $source")
-    assert(target.matches("[A-Z][A-Z]"), s"invalid target country code: $target")
+  def iso3166(source: IsoCountryCode, target: IsoCountryCode): UUID =
+    assert(source.isoPart1Alpha2.matches("[A-Z][A-Z]"), s"invalid source country code: $source")
+    assert(target.isoPart1Alpha2.matches("[A-Z][A-Z]"), s"invalid target country code: $target")
 
     import Version.ISO3166Based
 

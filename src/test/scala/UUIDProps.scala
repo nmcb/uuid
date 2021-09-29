@@ -1,6 +1,7 @@
 package identification
 
 import org.scalacheck.*
+import identification.UUID.IsoCountryCode
 
 object UUIDProps extends Properties("uuid.UUID"):
 
@@ -31,7 +32,7 @@ object UUIDProps extends Properties("uuid.UUID"):
       case None                   => ((msb & 0xF000L) == 0x0000L) || ((msb & 0xF000L) >= 0x7000L)
   }
 
-  property("iso3166") = forAll(sourcesAndTargets) { (source: String, target: String) =>
+  property("iso3166") = forAll(isoSourcesAndTargets) { (source: IsoCountryCode, target: IsoCountryCode) =>
       val uuid = UUID.iso3166(source, target)
 
       val correctType = (uuid.variant == LeachSalz) && (uuid.version.get == ISO3166Based)
@@ -39,11 +40,11 @@ object UUIDProps extends Properties("uuid.UUID"):
       correctType && correctData
   }
 
-  val sourcesAndTargets: Gen[(String, String)] =
+  val isoSourcesAndTargets: Gen[(IsoCountryCode, IsoCountryCode)] =
 
     import compat.JavaIsoCountryCodes
 
     for {
-      source <- Gen.oneOf(JavaIsoCountryCodes)
-      target <- Gen.oneOf(JavaIsoCountryCodes)
+      source <- Gen.oneOf(JavaIsoCountryCodes).map(IsoCountryCode.apply)
+      target <- Gen.oneOf(JavaIsoCountryCodes).map(IsoCountryCode.apply)
     } yield (source, target)
