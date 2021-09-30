@@ -35,15 +35,26 @@ object UUIDCompatProps extends Properties("uuid.compat"):
 
   import generators.*
 
-  property("java-variant-v4")    = forAll(javaVersion4UUID)(isJavaUUIDVariantCompatible)
-  property("java-version-v4")    = forAll(javaVersion4UUID)(isJavaUUIDVersionCompatible)
-  property("java-variant-apply") = forAll(javaUUID)(isJavaUUIDVariantCompatible)
-  property("java-version-apply") = forAll(javaUUID)(isJavaUUIDVersionCompatible)
+  property("applyIsJavaUUIDVariantCompatible") = forAll(javaApplyUUIDs)(isJavaUUIDVariantCompatible)
+  property("applyIsJavaUUIDVersionCompatible") = forAll(javaApplyUUIDs)(isJavaUUIDVersionCompatible)
+  property("v4IsJavaUUIDVariantCompatible") = forAll(javaVersion4UUIDs)(isJavaUUIDVariantCompatible)
+  property("v4IsJavaUUIDVersionCompatible") = forAll(javaVersion4UUIDs)(isJavaUUIDVersionCompatible)
+  property("v5IsJavaUUIDVariantCompatible") = forAll(javaVersion5UUIDs)(isJavaUUIDVariantCompatible)
+  property("v5IsJavaUUIDVersionCompatible") = forAll(javaVersion5UUIDs)(isJavaUUIDVersionCompatible)
 
   object generators:
 
-    val javaUUID: Gen[JavaUUID] =
-      for { msb <- Gen.long ; lsb <- Gen.long } yield JavaUUID(msb, lsb)
+    import Arbitrary.*
 
-    val javaVersion4UUID: Gen[JavaUUID] =    
-      Gen.label("java.util.UUID.randomUUID").map(_ => java.util.UUID.randomUUID)
+    val javaApplyUUIDs: Gen[JavaUUID] =
+      for {
+        msb <- arbitrary[Long]
+        lsb <- arbitrary[Long]
+      } yield JavaUUID(msb, lsb)
+
+    val javaVersion4UUIDs: Gen[JavaUUID] =    
+      Gen.map(_ => JavaUUID.randomUUID)
+
+    val javaVersion5UUIDs: Gen[JavaUUID] =    
+      Gen.containerOf[Array,Byte](arbitrary[Byte]).map(JavaUUID.nameUUIDFromBytes)
+

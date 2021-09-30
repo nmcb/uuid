@@ -96,6 +96,12 @@ object compat:
     def apply(msb: Long, lsb: Long): JavaUUID =
       java.util.UUID.apply(msb, lsb)
 
+    def randomUUID: JavaUUID =
+      java.util.UUID.randomUUID
+
+    def nameUUIDFromBytes(bytes: Array[Byte]): JavaUUID =
+      java.util.UUID.nameUUIDFromBytes(bytes)
+
   extension (uuid: UUID) def javaUUID: JavaUUID =
     JavaUUID(uuid.msb, uuid.lsb)
 
