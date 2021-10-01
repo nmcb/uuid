@@ -1,14 +1,27 @@
 package identification
+package test
 
 import org.scalacheck.*
+import identification.compat.JavaUUID
 
-object UUIDCompatProps extends Properties("uuid.compat"):
+object JavaUUIDCompatabilityProperties extends Properties("uuid.compat"):
+
+  import generators.*
+  import Prop.*
+
+  property("applyIsJavaUUIDVariantCompatible") = forAll(javaApplyUUIDs)(isJavaUUIDVariantCompatible)
+  property("applyIsJavaUUIDVersionCompatible") = forAll(javaApplyUUIDs)(isJavaUUIDVersionCompatible)
+  property("v4IsJavaUUIDVariantCompatible") = forAll(javaVersion4UUIDs)(isJavaUUIDVariantCompatible)
+  property("v4IsJavaUUIDVersionCompatible") = forAll(javaVersion4UUIDs)(isJavaUUIDVersionCompatible)
+  property("v5IsJavaUUIDVariantCompatible") = forAll(javaVersion5UUIDs)(isJavaUUIDVariantCompatible)
+  property("v5IsJavaUUIDVersionCompatible") = forAll(javaVersion5UUIDs)(isJavaUUIDVersionCompatible)
+
 
   import identification.*
   import Variant.*
   import Version.*
   
-  import compat.JavaUUID
+  import compat.*
   import compat.given
 
   val isJavaUUIDVariantCompatible: JavaUUID => Boolean =
@@ -30,17 +43,6 @@ object UUIDCompatProps extends Properties("uuid.compat"):
         case 5 => javaUUID.asScala.get.version == Some(SHA1HashBased)
         case 6 => javaUUID.asScala.get.version == Some(ISO3166Based)
         case _ => javaUUID.asScala.get.version == None
-
-  import Prop.*
-
-  import generators.*
-
-  property("applyIsJavaUUIDVariantCompatible") = forAll(javaApplyUUIDs)(isJavaUUIDVariantCompatible)
-  property("applyIsJavaUUIDVersionCompatible") = forAll(javaApplyUUIDs)(isJavaUUIDVersionCompatible)
-  property("v4IsJavaUUIDVariantCompatible") = forAll(javaVersion4UUIDs)(isJavaUUIDVariantCompatible)
-  property("v4IsJavaUUIDVersionCompatible") = forAll(javaVersion4UUIDs)(isJavaUUIDVersionCompatible)
-  property("v5IsJavaUUIDVariantCompatible") = forAll(javaVersion5UUIDs)(isJavaUUIDVariantCompatible)
-  property("v5IsJavaUUIDVersionCompatible") = forAll(javaVersion5UUIDs)(isJavaUUIDVersionCompatible)
 
   object generators:
 
