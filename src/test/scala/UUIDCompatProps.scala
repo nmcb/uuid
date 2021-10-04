@@ -9,13 +9,9 @@ object JavaUUIDCompatabilityProperties extends Properties("uuid.compat"):
   import generators.*
   import Prop.*
 
-  property("applyIsJavaUUIDVariantCompatible") = forAll(javaApplyUUIDs)(isJavaUUIDVariantCompatible)
-  property("applyIsJavaUUIDVersionCompatible") = forAll(javaApplyUUIDs)(isJavaUUIDVersionCompatible)
-  property("v4IsJavaUUIDVariantCompatible") = forAll(javaVersion4UUIDs)(isJavaUUIDVariantCompatible)
-  property("v4IsJavaUUIDVersionCompatible") = forAll(javaVersion4UUIDs)(isJavaUUIDVersionCompatible)
-  property("v5IsJavaUUIDVariantCompatible") = forAll(javaVersion5UUIDs)(isJavaUUIDVariantCompatible)
-  property("v5IsJavaUUIDVersionCompatible") = forAll(javaVersion5UUIDs)(isJavaUUIDVersionCompatible)
-
+  property("applyIsJavaUUIDCompatible") = forAll(javaApplyUUIDs)(isJavaUUIDCompatible)
+  property("v4IsJavaUUIDCompatible") = forAll(javaVersion4UUIDs)(isJavaUUIDCompatible)
+  property("v5IsJavaUUIDCompatible") = forAll(javaVersion5UUIDs)(isJavaUUIDCompatible)
 
   import identification.*
   import Variant.*
@@ -24,28 +20,31 @@ object JavaUUIDCompatabilityProperties extends Properties("uuid.compat"):
   import compat.*
   import compat.given
 
-  def compatibleWith(assertion: UUID => Boolean)(javaUUID: JavaUUID): Boolean =
+  def isJavaUUIDCompatible(javaUUID: JavaUUID): Boolean =
+    isJavaUUIDVersionCompatible(javaUUID) &&
+    isJavaUUIDVariantCompatible(javaUUID)
+
+  def isJavaUUIDVariantCompatible(javaUUID: JavaUUID): Boolean =
+    javaUUID.variant match
+      case 0 => javaUUID.compatibleWith(_.variant == NCSBackwardsCompatible)
+      case 2 => javaUUID.compatibleWith(_.variant == LeachSalz)
+      case 6 => javaUUID.compatibleWith(_.variant == MicrosoftBackwardsCompatible)
+      case 7 => javaUUID.compatibleWith(_.variant == Reserved)
+      case _ => false
+
+  def isJavaUUIDVersionCompatible(javaUUID: JavaUUID): Boolean =
+    javaUUID.version match
+      case 1 => javaUUID.compatibleWith(_.version == Some(TimeBased))
+      case 2 => javaUUID.compatibleWith(_.version == Some(DCESecurityBased))
+      case 3 => javaUUID.compatibleWith(_.version == Some(MD5HashBased))
+      case 4 => javaUUID.compatibleWith(_.version == Some(RandomBased))
+      case 5 => javaUUID.compatibleWith(_.version == Some(SHA1HashBased))
+      case 6 => javaUUID.compatibleWith(_.version == Some(ISO3166Based))
+      case _ => javaUUID.compatibleWith(_.version == None)
+
+  extension (javaUUID: JavaUUID) def compatibleWith(assertion: UUID => Boolean): Boolean =
     javaUUID.asScala.map(assertion).getOrElse(false)
 
-  val isJavaUUIDVariantCompatible: JavaUUID => Boolean =
-    (javaUUID: JavaUUID) =>
-      javaUUID.variant match
-        case 0 => compatibleWith(_.variant == NCSBackwardsCompatible)(javaUUID)
-        case 2 => compatibleWith(_.variant == LeachSalz)(javaUUID)
-        case 6 => compatibleWith(_.variant == MicrosoftBackwardsCompatible)(javaUUID)
-        case 7 => compatibleWith(_.variant == Reserved)(javaUUID)
-        case _ => false
-
-  val isJavaUUIDVersionCompatible: JavaUUID => Boolean =
-    (javaUUID: JavaUUID) =>
-      javaUUID.version match
-        case 1 => compatibleWith(_.version == Some(TimeBased))(javaUUID)
-        case 2 => compatibleWith(_.version == Some(DCESecurityBased))(javaUUID)
-        case 3 => compatibleWith(_.version == Some(MD5HashBased))(javaUUID)
-        case 4 => compatibleWith(_.version == Some(RandomBased))(javaUUID)
-        case 5 => compatibleWith(_.version == Some(SHA1HashBased))(javaUUID)
-        case 6 => compatibleWith(_.version == Some(ISO3166Based))(javaUUID)
-        case _ => compatibleWith(_.version == None)(javaUUID)
 
   object generators:
 
