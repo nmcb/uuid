@@ -5,5 +5,6 @@ lazy val root = project
   .settings( name                 := "uuid"
            , version              := "0.1.0"
            , scalaVersion         := scala3Version
-           , libraryDependencies ++= Seq( "org.scalacheck" %% "scalacheck"      % "1.15.4" % "test")
+           , libraryDependencies ++=
+               Seq("org.scalacheck" %% "scalacheck" % "1.15.4" % "test")
            )
