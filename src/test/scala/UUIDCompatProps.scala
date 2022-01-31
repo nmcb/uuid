@@ -16,7 +16,7 @@ object JavaUUIDCompatabilityProperties extends Properties("uuid.compat"):
     forAll(javaVersion4UUIDs)(isJavaUUIDVersion4Compatible)
 
   property("v5IsJavaUUIDCompatible") =
-    forAll(javaVersion5UUIDs)(isJavaUUIDVersion5Compatible)
+    forAll(javaVersion3UUIDs)(isJavaUUIDVersion3Compatible)
 
   import identification.*
   import Variant.*
@@ -51,7 +51,7 @@ object JavaUUIDCompatabilityProperties extends Properties("uuid.compat"):
     javaUUID.compatibleWith(_.version == Some(RandomBased)) &&
     isJavaUUIDVariantCompatible(javaUUID)
 
-  def isJavaUUIDVersion5Compatible(javaUUID: JavaUUID, name: Array[Byte]): Boolean =
+  def isJavaUUIDVersion3Compatible(javaUUID: JavaUUID, name: Array[Byte]): Boolean =
     java.util.UUID.nameUUIDFromBytes(name) == javaUUID &&
     javaUUID.compatibleWith(_.version == Some(MD5HashBased)) &&
     isJavaUUIDVariantCompatible(javaUUID)
@@ -74,7 +74,7 @@ object JavaUUIDCompatabilityProperties extends Properties("uuid.compat"):
     val javaVersion4UUIDs: Gen[JavaUUID] =    
       Gen.map(_ => JavaUUID.randomUUID)
 
-    val javaVersion5UUIDs: Gen[(JavaUUID,Array[Byte])] =    
+    val javaVersion3UUIDs: Gen[(JavaUUID,Array[Byte])] =    
       Gen
         .containerOf[Array,Byte](arbitrary[Byte])
         .map(bytes => (JavaUUID.nameUUIDFromBytes(bytes), bytes))
