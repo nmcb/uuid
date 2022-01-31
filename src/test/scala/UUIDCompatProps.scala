@@ -9,9 +9,14 @@ object JavaUUIDCompatabilityProperties extends Properties("uuid.compat"):
   import generators.*
   import Prop.*
 
-  property("applyIsJavaUUIDCompatible") = forAll(javaApplyUUIDs)(isJavaUUIDCompatible)
-  property("v4IsJavaUUIDCompatible") = forAll(javaVersion4UUIDs)(isJavaUUIDCompatible)
-  property("v5IsJavaUUIDCompatible") = forAll(javaVersion5UUIDs)(isJavaUUIDCompatible)
+  property("applyIsJavaUUIDCompatible") =
+    forAll(javaApplyUUIDs)(isJavaUUIDCompatible)
+
+  property("v4IsJavaUUIDCompatible") =
+    forAll(javaVersion4UUIDs)(isJavaUUIDVersion4Compatible)
+
+  property("v5IsJavaUUIDCompatible") =
+    forAll(javaVersion5UUIDs)(isJavaUUIDVersion5Compatible)
 
   import identification.*
   import Variant.*
@@ -42,6 +47,16 @@ object JavaUUIDCompatabilityProperties extends Properties("uuid.compat"):
       case 6 => javaUUID.compatibleWith(_.version == Some(ISO3166Based))
       case _ => javaUUID.compatibleWith(_.version == None)
 
+  def isJavaUUIDVersion4Compatible(javaUUID: JavaUUID): Boolean =
+    javaUUID.compatibleWith(_.version == Some(RandomBased)) &&
+    isJavaUUIDVariantCompatible(javaUUID)
+
+  def isJavaUUIDVersion5Compatible(javaUUID: JavaUUID, name: Array[Byte]): Boolean =
+    java.util.UUID.nameUUIDFromBytes(name) == javaUUID &&
+    javaUUID.compatibleWith(_.version == Some(MD5HashBased)) &&
+    isJavaUUIDVariantCompatible(javaUUID)
+
+
   extension (javaUUID: JavaUUID) def compatibleWith(assertion: UUID => Boolean): Boolean =
     javaUUID.asScala.map(assertion).getOrElse(false)
 
@@ -59,5 +74,7 @@ object JavaUUIDCompatabilityProperties extends Properties("uuid.compat"):
     val javaVersion4UUIDs: Gen[JavaUUID] =    
       Gen.map(_ => JavaUUID.randomUUID)
 
-    val javaVersion5UUIDs: Gen[JavaUUID] =    
-      Gen.containerOf[Array,Byte](arbitrary[Byte]).map(JavaUUID.nameUUIDFromBytes)
+    val javaVersion5UUIDs: Gen[(JavaUUID,Array[Byte])] =    
+      Gen
+        .containerOf[Array,Byte](arbitrary[Byte])
+        .map(bytes => (JavaUUID.nameUUIDFromBytes(bytes), bytes))
