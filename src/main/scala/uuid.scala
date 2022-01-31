@@ -102,7 +102,7 @@ object compat:
     def nameUUIDFromBytes(bytes: Array[Byte]): JavaUUID =
       java.util.UUID.nameUUIDFromBytes(bytes)
 
-  extension (uuid: UUID) def javaUUID: JavaUUID =
+  extension (uuid: UUID) def asJavaUUID: JavaUUID =
     JavaUUID(uuid.msb, uuid.lsb)
 
   trait Dec[A]:
