@@ -12,10 +12,10 @@ object JavaUUIDCompatabilityProperties extends Properties("uuid.compat"):
   property("applyIsJavaUUIDCompatible") =
     forAll(javaApplyUUIDs)(isJavaUUIDCompatible)
 
-  property("v4IsJavaUUIDCompatible") =
+  property("v4IsJavaUUIDCompatible - RandomBased") =
     forAll(javaVersion4UUIDs)(isJavaUUIDVersion4Compatible)
 
-  property("v5IsJavaUUIDCompatible") =
+  property("v3IsJavaUUIDCompatible - MD5HashBased") =
     forAll(javaVersion3UUIDs)(isJavaUUIDVersion3Compatible)
 
   import identification.*
