@@ -1,8 +1,8 @@
-package identification
+package id
 package test
 
 import org.scalacheck.*
-import identification.compat.JavaUUID
+import id.compat.JavaUUID
 
 object JavaUUIDCompatabilityProperties extends Properties("uuid.compat"):
 
@@ -18,7 +18,7 @@ object JavaUUIDCompatabilityProperties extends Properties("uuid.compat"):
   property("v3IsJavaUUIDCompatible - MD5HashBased") =
     forAll(javaVersion3UUIDs)(isJavaUUIDVersion3Compatible)
 
-  import identification.*
+  import id.*
   import Variant.*
   import Version.*
   
