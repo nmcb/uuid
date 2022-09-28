@@ -1,11 +1,11 @@
-package identification
+package id
 
 import org.scalacheck.*
-import identification.UUID.CountryCode
+import id.UUID.CountryCode
 
 object UUIDProps extends Properties("uuid.UUID"):
 
-  import identification.*
+  import id.*
 
   import util.*
   import util.given

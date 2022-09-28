@@ -1,4 +1,4 @@
-package identification
+package id
 
 case class UUID(msb: Long, lsb: Long):
 
