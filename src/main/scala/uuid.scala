@@ -40,7 +40,10 @@ object UUID:
   import compat.*
   import JavaUUID.*
 
-  case class CountryCode(isoPart1Alpha2: String)
+  case class CountryCode(underlying: String):
+    def isoPart1Alpha2: String =
+      assert(JavaCountryCodes.contains(underlying), s"invalid country code: $underlying")
+      underlying
 
   object CountryCode:
     def apply(msb: Byte, lsb: Byte): CountryCode =
@@ -62,8 +65,6 @@ object UUID:
     (lsb & 0xffff_ffff_fff0_0000L) + scode + tcode
 
   def iso3166(source: CountryCode, target: CountryCode, from: JavaUUID = JavaUUID.randomUUID): UUID =
-    assert(source.isoPart1Alpha2.matches("[A-Z][A-Z]"), s"invalid source country code: $source")
-    assert(target.isoPart1Alpha2.matches("[A-Z][A-Z]"), s"invalid target country code: $target")
     assert(from.asScala.version.contains(Version.RandomBased), s"invalid java uuid version: ${from.asScala.version}")
 
     import Version.ISO3166Based
