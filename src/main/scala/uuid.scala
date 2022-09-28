@@ -6,6 +6,8 @@ case class UUID(msb: Long, lsb: Long):
   import Variant.*
   import Version.*
 
+  import compat.*
+
   def variant: Variant =
     ((lsb >>> 61) & 0x0000_0000_0000_0007) match
       case 0x00 => NCSBackwardsCompatible
@@ -35,6 +37,9 @@ case class UUID(msb: Long, lsb: Long):
 
 object UUID:
 
+  import compat.*
+  import JavaUUID.*
+
   case class CountryCode(isoPart1Alpha2: String)
 
   object CountryCode:
@@ -56,15 +61,15 @@ object UUID:
     val tcode = target.isoPart1Alpha2.getBytes("US-ASCII").foldLeft(0L)((a,b) => (a << 5) + ((b - 0x41) & 0x1f))
     (lsb & 0xffff_ffff_fff0_0000L) + scode + tcode
 
-  def iso3166(source: CountryCode, target: CountryCode): UUID =
+  def iso3166(source: CountryCode, target: CountryCode, from: JavaUUID = JavaUUID.randomUUID): UUID =
     assert(source.isoPart1Alpha2.matches("[A-Z][A-Z]"), s"invalid source country code: $source")
     assert(target.isoPart1Alpha2.matches("[A-Z][A-Z]"), s"invalid target country code: $target")
+    assert(from.asScala.version.contains(Version.RandomBased), s"invalid java uuid version: ${from.asScala.version}")
 
     import Version.ISO3166Based
 
-    val rnd = java.util.UUID.randomUUID
-    val msb = rnd.getMostSignificantBits & ISO3166Based.mask
-    UUID(msb + ISO3166Based.bits, encode(source, target)(rnd.getLeastSignificantBits))
+    val msb = from.getMostSignificantBits & ISO3166Based.mask
+    UUID(msb + ISO3166Based.bits, encode(source, target)(from.getLeastSignificantBits))
 
 trait Masked {
   def mask: Long
@@ -102,14 +107,11 @@ object compat:
     def nameUUIDFromBytes(bytes: Array[Byte]): JavaUUID =
       java.util.UUID.nameUUIDFromBytes(bytes)
 
-  extension (uuid: UUID) def asJavaUUID: JavaUUID =
-    JavaUUID(uuid.msb, uuid.lsb)
+    extension (uuid: UUID) def asJavaUUID: JavaUUID =
+      JavaUUID(uuid.msb, uuid.lsb)
 
-  trait Dec[A]:
-    extension (a: A) def asScala: Some[UUID]
-
-  given Dec[JavaUUID] =
-    (uuid: JavaUUID) => Some(UUID(uuid.getMostSignificantBits, uuid.getLeastSignificantBits))
+    extension (javaUUID: JavaUUID) def asScala: UUID =
+      UUID(javaUUID.getMostSignificantBits, javaUUID.getLeastSignificantBits)
 
   val JavaCountryCodes: Set[String] =
     import java.util.Locale
