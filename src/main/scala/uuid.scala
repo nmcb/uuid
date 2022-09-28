@@ -40,10 +40,12 @@ object UUID:
   import compat.*
   import JavaUUID.*
 
+  /** wrapper for a two character upper case country code */
   case class CountryCode(underlying: String):
-    def isoPart1Alpha2: String =
-      assert(JavaCountryCodes.contains(underlying), s"invalid country code: $underlying")
-      underlying
+    assert(underlying.matches("[A-Z][A-Z]"), s"not a two character upper case string: $underlying")
+
+    def isoPart1Alpha2: Option[String] =
+      Option.when(JavaCountryCodes.contains(underlying))(underlying)
 
   object CountryCode:
     def apply(msb: Byte, lsb: Byte): CountryCode =
@@ -60,8 +62,8 @@ object UUID:
     CountryCode(node2.toByte, node3.toByte)
 
   private def encode(source: CountryCode, target: CountryCode)(lsb: Long): Long =
-    val scode = source.isoPart1Alpha2.getBytes("US-ASCII").foldLeft(0L)((a,b) => (a << 5) + ((b - 0x41) & 0x1f)) << 10
-    val tcode = target.isoPart1Alpha2.getBytes("US-ASCII").foldLeft(0L)((a,b) => (a << 5) + ((b - 0x41) & 0x1f))
+    val scode = source.underlying.getBytes("US-ASCII").foldLeft(0L)((a,b) => (a << 5) + ((b - 0x41) & 0x1f)) << 10
+    val tcode = target.underlying.getBytes("US-ASCII").foldLeft(0L)((a,b) => (a << 5) + ((b - 0x41) & 0x1f))
     (lsb & 0xffff_ffff_fff0_0000L) + scode + tcode
 
   def iso3166(source: CountryCode, target: CountryCode, from: JavaUUID = JavaUUID.randomUUID): UUID =
