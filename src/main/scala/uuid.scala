@@ -40,7 +40,15 @@ object UUID:
   import compat.*
   import JavaUUID.*
 
-  case class CountryCode(isoPart1Alpha2: String)
+  /** wrapper for a two character upper case country code, ie. "NL", "FR", "BE", "" this
+   *
+   *  - removes the constraint to embed only country codes
+   *  - */
+  case class CountryCode(underlying: String):
+    assert(underlying.matches("[A-Z][A-Z]"), s"not a two character upper case string: $underlying")
+
+    def isoPart1Alpha2: Option[String] =
+      Option.when(JavaCountryCodes.contains(underlying))(underlying)
 
   object CountryCode:
     def apply(msb: Byte, lsb: Byte): CountryCode =
@@ -57,13 +65,11 @@ object UUID:
     CountryCode(node2.toByte, node3.toByte)
 
   private def encode(source: CountryCode, target: CountryCode)(lsb: Long): Long =
-    val scode = source.isoPart1Alpha2.getBytes("US-ASCII").foldLeft(0L)((a,b) => (a << 5) + ((b - 0x41) & 0x1f)) << 10
-    val tcode = target.isoPart1Alpha2.getBytes("US-ASCII").foldLeft(0L)((a,b) => (a << 5) + ((b - 0x41) & 0x1f))
+    val scode = source.underlying.getBytes("US-ASCII").foldLeft(0L)((a,b) => (a << 5) + ((b - 0x41) & 0x1f)) << 10
+    val tcode = target.underlying.getBytes("US-ASCII").foldLeft(0L)((a,b) => (a << 5) + ((b - 0x41) & 0x1f))
     (lsb & 0xffff_ffff_fff0_0000L) + scode + tcode
 
   def iso3166(source: CountryCode, target: CountryCode, from: JavaUUID = JavaUUID.randomUUID): UUID =
-    assert(source.isoPart1Alpha2.matches("[A-Z][A-Z]"), s"invalid source country code: $source")
-    assert(target.isoPart1Alpha2.matches("[A-Z][A-Z]"), s"invalid target country code: $target")
     assert(from.asScala.version.contains(Version.RandomBased), s"invalid java uuid version: ${from.asScala.version}")
 
     import Version.ISO3166Based
@@ -114,6 +120,6 @@ object compat:
       UUID(javaUUID.getMostSignificantBits, javaUUID.getLeastSignificantBits)
 
   val JavaCountryCodes: Set[String] =
-    import java.util.Locale
-    import scala.jdk.CollectionConverters._
-    Locale.getISOCountries(Locale.IsoCountryCode.PART1_ALPHA2).asScala.toSet
+    import java.util.Locale.*
+    import scala.jdk.CollectionConverters.*
+    getISOCountries(IsoCountryCode.PART1_ALPHA2).asScala.toSet
