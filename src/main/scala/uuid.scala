@@ -40,7 +40,10 @@ object UUID:
   import compat.*
   import JavaUUID.*
 
-  /** wrapper for a two character upper case country code */
+  /** wrapper for a two character upper case country code, ie. "NL", "FR", "BE", "" this
+   *
+   *  - removes the constraint to embed only country codes
+   *  - */
   case class CountryCode(underlying: String):
     assert(underlying.matches("[A-Z][A-Z]"), s"not a two character upper case string: $underlying")
 
@@ -117,6 +120,6 @@ object compat:
       UUID(javaUUID.getMostSignificantBits, javaUUID.getLeastSignificantBits)
 
   val JavaCountryCodes: Set[String] =
-    import java.util.Locale
-    import scala.jdk.CollectionConverters._
-    Locale.getISOCountries(Locale.IsoCountryCode.PART1_ALPHA2).asScala.toSet
+    import java.util.Locale.*
+    import scala.jdk.CollectionConverters.*
+    getISOCountries(IsoCountryCode.PART1_ALPHA2).asScala.toSet
