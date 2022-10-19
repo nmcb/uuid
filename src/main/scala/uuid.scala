@@ -40,10 +40,7 @@ object UUID:
   import compat.*
   import JavaUUID.*
 
-  /** wrapper for a two character upper case country code, ie. "NL", "FR", "BE", "" this
-   *
-   *  - removes the constraint to embed only country codes
-   *  - */
+  /** wrapper for a two character upper case country code */
   case class CountryCode(underlying: String):
     assert(underlying.matches("[A-Z][A-Z]"), s"not a two character upper case string: $underlying")
 
