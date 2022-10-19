@@ -117,6 +117,6 @@ object compat:
       UUID(javaUUID.getMostSignificantBits, javaUUID.getLeastSignificantBits)
 
   val JavaCountryCodes: Set[String] =
-    import java.util.Locale
-    import scala.jdk.CollectionConverters._
-    Locale.getISOCountries(Locale.IsoCountryCode.PART1_ALPHA2).asScala.toSet
+    import java.util.Locale.*
+    import scala.jdk.CollectionConverters.*
+    getISOCountries(IsoCountryCode.PART1_ALPHA2).asScala.toSet
