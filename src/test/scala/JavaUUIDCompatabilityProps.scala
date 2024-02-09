@@ -44,7 +44,9 @@ object JavaUUIDCompatabilityProps extends Properties("uuid.compat"):
       case 3 => javaUUID.asScala.version == Some(MD5HashBased)
       case 4 => javaUUID.asScala.version == Some(RandomBased)
       case 5 => javaUUID.asScala.version == Some(SHA1HashBased)
-      case 6 => javaUUID.asScala.version == Some(ISO3166Based)
+      case 6 => javaUUID.asScala.version == Some(Version6)
+      case 7 => javaUUID.asScala.version == Some(Version7)
+      case 8 => javaUUID.asScala.version == Some(ISO3166Based)
       case _ => javaUUID.asScala.version == None
 
   def isJavaUUIDVersion4Compatible(javaUUID: JavaUUID): Boolean =

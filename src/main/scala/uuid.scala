@@ -26,7 +26,9 @@ case class UUID(msb: Long, lsb: Long):
       case 0x03 => Some(MD5HashBased)
       case 0x04 => Some(RandomBased)
       case 0x05 => Some(SHA1HashBased)
-      case 0x06 => Some(ISO3166Based)
+      case 0x06 => Some(Version6)
+      case 0x07 => Some(Version7)
+      case 0x08 => Some(ISO3166Based)
       case _    => None
 
   def sourceCountryCode: Option[CountryCode] =
@@ -94,7 +96,9 @@ enum Version(val bits: Long) extends Masked:
   case MD5HashBased     extends Version(0x0000_0000_0000_3000L)
   case RandomBased      extends Version(0x0000_0000_0000_4000L)
   case SHA1HashBased    extends Version(0x0000_0000_0000_5000L)
-  case ISO3166Based     extends Version(0x0000_0000_0000_6000L)
+  case Version6         extends Version(0x0000_0000_0000_6000L)
+  case Version7         extends Version(0x0000_0000_0000_7000L)
+  case ISO3166Based     extends Version(0x0000_0000_0000_8000L)
 
 object compat:
 
