@@ -4,7 +4,7 @@ package test
 import org.scalacheck.*
 import id.compat.JavaUUID
 
-object JavaUUIDCompatabilityProps extends Properties("uuid.compat"):
+object JavaUUIDCompatibilityProps extends Properties("uuid.compat"):
 
   import generators.*
   import Prop.*
