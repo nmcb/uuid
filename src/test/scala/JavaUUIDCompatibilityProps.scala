@@ -4,7 +4,7 @@ package test
 import org.scalacheck.*
 import id.compat.JavaUUID
 
-object JavaUUIDCompatabilityProps extends Properties("uuid.compat"):
+object JavaUUIDCompatibilityProps extends Properties("uuid.compat"):
 
   import generators.*
   import Prop.*
@@ -50,13 +50,13 @@ object JavaUUIDCompatabilityProps extends Properties("uuid.compat"):
       case _ => javaUUID.asScala.version == None
 
   def isJavaUUIDVersion4Compatible(javaUUID: JavaUUID): Boolean =
-    javaUUID.asScala.version == Some(RandomBased) &&
-    isJavaUUIDVariantCompatible(javaUUID)
+    val isRandomBased = javaUUID.asScala.version == Some(RandomBased)
+    isRandomBased && isJavaUUIDVariantCompatible(javaUUID)
 
   def isJavaUUIDVersion3Compatible(javaUUID: JavaUUID, name: Array[Byte]): Boolean =
-    java.util.UUID.nameUUIDFromBytes(name) == javaUUID &&
-    javaUUID.asScala.version == Some(MD5HashBased) &&
-    isJavaUUIDVariantCompatible(javaUUID)
+    val isNameBased = java.util.UUID.nameUUIDFromBytes(name) == javaUUID
+    val isMD5Hased  = javaUUID.asScala.version == Some(MD5HashBased)
+    isNameBased && isMD5Hased && isJavaUUIDVariantCompatible(javaUUID)
 
   object generators:
 

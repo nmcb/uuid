@@ -36,16 +36,13 @@ object UUIDProps extends Properties("uuid.UUID"):
 
   property("iso3166") = forAll(isoSourcesAndTargets) { (source: CountryCode, target: CountryCode) =>
       val uuid = UUID.iso3166(source, target)
-
       val correctType = (uuid.variant == LeachSalz) && (uuid.version.get == ISO3166Based)
       val correctData = (uuid.sourceCountryCode.get == source) && (uuid.targetCountryCode.get == target)
       correctType && correctData
   }
 
   val isoSourcesAndTargets: Gen[(CountryCode, CountryCode)] =
-
     import compat.JavaCountryCodes
-
     for {
       source <- Gen.oneOf(JavaCountryCodes).map(CountryCode.apply)
       target <- Gen.oneOf(JavaCountryCodes).map(CountryCode.apply)
