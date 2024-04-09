@@ -9,7 +9,7 @@ case class UUID(msb: Long, lsb: Long):
   import compat.*
 
   def variant: Variant =
-    ((lsb >>> 61) & 0x0000_0000_0000_0007) match
+    (lsb >>> 61) & 0x0000_0000_0000_0007 match
       case 0x00 => NCSBackwardsCompatible
       case 0x01 => NCSBackwardsCompatible
       case 0x02 => NCSBackwardsCompatible
@@ -20,7 +20,7 @@ case class UUID(msb: Long, lsb: Long):
       case 0x07 => Reserved
 
   def version: Option[Version] =
-    ((msb >>> 12) & 0x0000_0000_0000_000f) match
+    (msb >>> 12) & 0x0000_0000_0000_000f match
       case 0x01 => Some(TimeBased)
       case 0x02 => Some(DCESecurityBased)
       case 0x03 => Some(MD5HashBased)
@@ -46,6 +46,9 @@ object UUID:
   case class CountryCode(underlying: String):
     assert(underlying.matches("[A-Z][A-Z]"), s"not a two character upper case string: $underlying")
 
+    def asBytes: Array[Byte] =
+      underlying.getBytes("US-ASCII")
+
     def isoPart1Alpha2: Option[String] =
       Option.when(JavaCountryCodes.contains(underlying))(underlying)
 
@@ -64,9 +67,10 @@ object UUID:
     CountryCode(node2.toByte, node3.toByte)
 
   private def encode(source: CountryCode, target: CountryCode)(lsb: Long): Long =
-    val scode = source.underlying.getBytes("US-ASCII").foldLeft(0L)((a,b) => (a << 5) + ((b - 0x41) & 0x1f)) << 10
-    val tcode = target.underlying.getBytes("US-ASCII").foldLeft(0L)((a,b) => (a << 5) + ((b - 0x41) & 0x1f))
-    (lsb & 0xffff_ffff_fff0_0000L) + scode + tcode
+    def extractor(accumulator: Long, byte: Byte): Long = (accumulator << 5) + ((byte - 0x41) & 0x1f)
+    val scode = source.asBytes.foldLeft(0L)(extractor)
+    val tcode = target.asBytes.foldLeft(0L)(extractor)
+    (lsb & 0xffff_ffff_fff0_0000L) + (scode << 10) + tcode
 
   def iso3166(source: CountryCode, target: CountryCode, from: JavaUUID = JavaUUID.randomUUID): UUID =
     assert(from.asScala.version.contains(Version.RandomBased), s"invalid java uuid version: ${from.asScala.version}")
