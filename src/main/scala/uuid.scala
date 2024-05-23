@@ -8,7 +8,7 @@ case class UUID(msb: Long, lsb: Long):
 
   import compat.*
 
-  def variant: Variant =
+  lazy val variant: Variant =
     (lsb >>> 61) & 0x0000_0000_0000_0007 match
       case 0x00 => NCSBackwardsCompatible
       case 0x01 => NCSBackwardsCompatible
@@ -19,7 +19,7 @@ case class UUID(msb: Long, lsb: Long):
       case 0x06 => MicrosoftBackwardsCompatible
       case 0x07 => Reserved
 
-  def version: Option[Version] =
+  lazy val version: Option[Version] =
     (msb >>> 12) & 0x0000_0000_0000_000f match
       case 0x01 => Some(TimeBased)
       case 0x02 => Some(DCESecurityBased)
@@ -31,10 +31,10 @@ case class UUID(msb: Long, lsb: Long):
       case 0x08 => Some(ISO3166Based)
       case _    => None
 
-  def sourceCountryCode: Option[CountryCode] =
+  lazy val sourceCountryCode: Option[CountryCode] =
     Option.when(version.contains(ISO3166Based))(decodeSource(lsb))
 
-  def targetCountryCode: Option[CountryCode] =
+  lazy val targetCountryCode: Option[CountryCode] =
     Option.when(version.contains(ISO3166Based))(decodeTarget(lsb))
 
 object UUID:
