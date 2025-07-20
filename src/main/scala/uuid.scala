@@ -6,8 +6,6 @@ case class UUID(msb: Long, lsb: Long):
   import Variant.*
   import Version.*
 
-  import compat.*
-
   lazy val variant: Variant =
     (lsb >>> 61) & 0x0000_0000_0000_0007 match
       case 0x00 => NCSBackwardsCompatible
