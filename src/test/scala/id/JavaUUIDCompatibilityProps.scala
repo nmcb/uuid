@@ -1,13 +1,11 @@
 package id
-package test
 
 import org.scalacheck.*
-import id.compat.JavaUUID
 
 object JavaUUIDCompatibilityProps extends Properties("uuid.compat"):
 
-  import generators.*
   import Prop.*
+  import generators.*
 
   property("applyIsJavaUUIDCompatible") =
     forAll(javaApplyUUIDs)(isJavaUUIDCompatible)
@@ -18,11 +16,9 @@ object JavaUUIDCompatibilityProps extends Properties("uuid.compat"):
   property("v3IsJavaUUIDCompatible - MD5HashBased") =
     forAll(javaVersion3UUIDs)(isJavaUUIDVersion3Compatible)
 
-  import id.*
+  import compat.*
   import Variant.*
   import Version.*
-  
-  import compat.*
   import compat.JavaUUID.*
 
   def isJavaUUIDCompatible(javaUUID: JavaUUID): Boolean =
@@ -39,39 +35,40 @@ object JavaUUIDCompatibilityProps extends Properties("uuid.compat"):
 
   def isJavaUUIDVersionCompatible(javaUUID: JavaUUID): Boolean =
     javaUUID.version match
-      case 1 => javaUUID.asScala.version == Some(TimeBased)
-      case 2 => javaUUID.asScala.version == Some(DCESecurityBased)
-      case 3 => javaUUID.asScala.version == Some(MD5HashBased)
-      case 4 => javaUUID.asScala.version == Some(RandomBased)
-      case 5 => javaUUID.asScala.version == Some(SHA1HashBased)
-      case 6 => javaUUID.asScala.version == Some(Version6)
-      case 7 => javaUUID.asScala.version == Some(Version7)
-      case 8 => javaUUID.asScala.version == Some(ISO3166Based)
-      case _ => javaUUID.asScala.version == None
+      case 1 => javaUUID.asScala.version.contains(TimeBased)
+      case 2 => javaUUID.asScala.version.contains(DCESecurityBased)
+      case 3 => javaUUID.asScala.version.contains(MD5HashBased)
+      case 4 => javaUUID.asScala.version.contains(RandomBased)
+      case 5 => javaUUID.asScala.version.contains(SHA1HashBased)
+      case 6 => javaUUID.asScala.version.contains(Version6)
+      case 7 => javaUUID.asScala.version.contains(Version7)
+      case 8 => javaUUID.asScala.version.contains(ISO3166Based)
+      case _ => javaUUID.asScala.version.isEmpty
 
   def isJavaUUIDVersion4Compatible(javaUUID: JavaUUID): Boolean =
-    val isRandomBased = javaUUID.asScala.version == Some(RandomBased)
+    val isRandomBased = javaUUID.asScala.version.contains(RandomBased)
     isRandomBased && isJavaUUIDVariantCompatible(javaUUID)
 
   def isJavaUUIDVersion3Compatible(javaUUID: JavaUUID, name: Array[Byte]): Boolean =
     val isNameBased = java.util.UUID.nameUUIDFromBytes(name) == javaUUID
-    val isMD5Hased  = javaUUID.asScala.version == Some(MD5HashBased)
-    isNameBased && isMD5Hased && isJavaUUIDVariantCompatible(javaUUID)
+    val isMD5Hashed = javaUUID.asScala.version.contains(MD5HashBased)
+    isNameBased && isMD5Hashed && isJavaUUIDVariantCompatible(javaUUID)
 
   object generators:
 
     import Arbitrary.*
 
     val javaApplyUUIDs: Gen[JavaUUID] =
-      for {
+      for
         msb <- arbitrary[Long]
         lsb <- arbitrary[Long]
-      } yield JavaUUID(msb, lsb)
+      yield
+        JavaUUID(msb, lsb)
 
     val javaVersion4UUIDs: Gen[JavaUUID] =    
       Gen.map(_ => JavaUUID.randomUUID)
 
-    val javaVersion3UUIDs: Gen[(JavaUUID,Array[Byte])] =    
+    val javaVersion3UUIDs: Gen[(JavaUUID, Array[Byte])] =    
       Gen
-        .containerOf[Array,Byte](arbitrary[Byte])
+        .containerOf[Array, Byte](arbitrary[Byte])
         .map(bytes => (JavaUUID.nameUUIDFromBytes(bytes), bytes))

@@ -54,21 +54,21 @@ object UUID:
     def apply(msb: Byte, lsb: Byte): CountryCode =
       CountryCode(String(Array(msb, lsb), "US-ASCII"))
 
-  def decodeTarget(lsb: Long): CountryCode =
+  private def decodeTarget(lsb: Long): CountryCode =
     val node5 = (lsb & 0x0000_0000_0000_001f) + 0x41
     val node4 = ((lsb >>>  5) & 0x0000_0000_0000_001f) + 0x41
     CountryCode(node4.toByte, node5.toByte)
 
-  def decodeSource(lsb: Long): CountryCode =
+  private def decodeSource(lsb: Long): CountryCode =
     val node3 = ((lsb >>> 10) & 0x0000_0000_0000_001f) + 0x41
     val node2 = ((lsb >>> 15) & 0x0000_0000_0000_001f) + 0x41
     CountryCode(node2.toByte, node3.toByte)
 
   private def encode(source: CountryCode, target: CountryCode)(lsb: Long): Long =
     def extractor(accumulator: Long, byte: Byte): Long = (accumulator << 5) + ((byte - 0x41) & 0x1f)
-    val scode = source.asBytes.foldLeft(0L)(extractor)
-    val tcode = target.asBytes.foldLeft(0L)(extractor)
-    (lsb & 0xffff_ffff_fff0_0000L) + (scode << 10) + tcode
+    val sourceCode = source.asBytes.foldLeft(0L)(extractor)
+    val targetCode = target.asBytes.foldLeft(0L)(extractor)
+    (lsb & 0xffff_ffff_fff0_0000L) + (sourceCode << 10) + targetCode
 
   def iso3166(source: CountryCode, target: CountryCode, from: JavaUUID = JavaUUID.randomUUID): UUID =
     assert(from.asScala.version.contains(Version.RandomBased), s"invalid java uuid version: ${from.asScala.version}")
@@ -102,6 +102,7 @@ object compat:
   type JavaUUID = java.util.UUID
 
   object JavaUUID:
+    
     def apply(msb: Long, lsb: Long): JavaUUID =
       java.util.UUID.apply(msb, lsb)
 
