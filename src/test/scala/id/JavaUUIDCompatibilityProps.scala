@@ -16,10 +16,10 @@ object JavaUUIDCompatibilityProps extends Properties("uuid.compat"):
   property("v3IsJavaUUIDCompatible - MD5HashBased") =
     forAll(javaVersion3UUIDs)(isJavaUUIDVersion3Compatible)
 
-  import compat.*
+  import compat.{*, given}
+  import JavaUUID.*
   import Variant.*
   import Version.*
-  import compat.JavaUUID.*
 
   def isJavaUUIDCompatible(javaUUID: JavaUUID): Boolean =
     isJavaUUIDVersionCompatible(javaUUID) &&

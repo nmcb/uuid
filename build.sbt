@@ -8,3 +8,14 @@ lazy val root = project
            , libraryDependencies ++=
                Seq("org.scalacheck" %% "scalacheck" % "1.19.0" % "test")
            )
+
+ThisBuild / scalacOptions ++= Seq(
+  "-encoding", "utf8",
+  "-feature",
+  "-language:implicitConversions",
+  "-language:existentials",
+  "-language:strictEquality",
+  "-unchecked",
+  "-Werror",
+  "-deprecation"
+)

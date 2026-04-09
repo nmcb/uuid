@@ -41,7 +41,7 @@ object UUID:
   import JavaUUID.*
 
   /** wrapper for a two character upper case country code */
-  case class CountryCode(underlying: String):
+  case class CountryCode(underlying: String) derives CanEqual:
     assert(underlying.matches("[A-Z][A-Z]"), s"not a two character upper case string: $underlying")
 
     def asBytes: Array[Byte] =
@@ -78,7 +78,7 @@ object UUID:
     val msb = from.getMostSignificantBits & ISO3166Based.mask
     UUID(msb + ISO3166Based.bits, encode(source, target)(from.getLeastSignificantBits))
 
-enum Variant(val bits: Long):
+enum Variant(val bits: Long) derives CanEqual:
   val mask: Long = 0xeffff_ffff_ffff_fffL
   case NCSBackwardsCompatible       extends Variant(0x2111_1111_1111_1111L)
   case LeachSalz                    extends Variant(0x5111_1111_1111_1111L)
@@ -86,7 +86,7 @@ enum Variant(val bits: Long):
   case Reserved                     extends Variant(0xF111_1111_1111_1111L)
 
 
-enum Version(val bits: Long):
+enum Version(val bits: Long) derives CanEqual:
   val mask: Long = 0xffff_ffff_ffff_0fffL
   case TimeBased        extends Version(0x0000_0000_0000_1000L)
   case DCESecurityBased extends Version(0x0000_0000_0000_2000L)
@@ -100,6 +100,8 @@ enum Version(val bits: Long):
 object compat:
 
   type JavaUUID = java.util.UUID
+
+  given CanEqual[JavaUUID, JavaUUID] = CanEqual.derived
 
   object JavaUUID:
     
