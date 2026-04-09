@@ -17,9 +17,9 @@ object JavaUUIDCompatibilityProps extends Properties("uuid.compat"):
     forAll(javaVersion3UUIDs)(isJavaUUIDVersion3Compatible)
 
   import compat.{*, given}
+  import JavaUUID.*
   import Variant.*
   import Version.*
-  import compat.JavaUUID.*
 
   def isJavaUUIDCompatible(javaUUID: JavaUUID): Boolean =
     isJavaUUIDVersionCompatible(javaUUID) &&
