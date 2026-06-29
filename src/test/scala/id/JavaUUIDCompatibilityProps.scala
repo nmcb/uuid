@@ -17,9 +17,9 @@ object JavaUUIDCompatibilityProps extends Properties("uuid.compat"):
     forAll(javaVersion3UUIDs)(isJavaUUIDVersion3Compatible)
 
   import compat.{*, given}
+  import JavaUUID.*
   import Variant.*
   import Version.*
-  import compat.JavaUUID.*
 
   def isJavaUUIDCompatible(javaUUID: JavaUUID): Boolean =
     isJavaUUIDVersionCompatible(javaUUID) &&
@@ -68,7 +68,7 @@ object JavaUUIDCompatibilityProps extends Properties("uuid.compat"):
     val javaVersion4UUIDs: Gen[JavaUUID] =    
       Gen.map(_ => JavaUUID.randomUUID)
 
-    val javaVersion3UUIDs: Gen[(JavaUUID, Array[Byte])] =    
+    val javaVersion3UUIDs: Gen[(JavaUUID, Array[Byte])] =
       Gen
         .containerOf[Array, Byte](arbitrary[Byte])
         .map(bytes => (JavaUUID.nameUUIDFromBytes(bytes), bytes))
