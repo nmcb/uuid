@@ -68,7 +68,7 @@ object JavaUUIDCompatibilityProps extends Properties("uuid.compat"):
     val javaVersion4UUIDs: Gen[JavaUUID] =    
       Gen.map(_ => JavaUUID.randomUUID)
 
-    val javaVersion3UUIDs: Gen[(JavaUUID, Array[Byte])] =    
+    val javaVersion3UUIDs: Gen[(JavaUUID, Array[Byte])] =
       Gen
         .containerOf[Array, Byte](arbitrary[Byte])
         .map(bytes => (JavaUUID.nameUUIDFromBytes(bytes), bytes))
