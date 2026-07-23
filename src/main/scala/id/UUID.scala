@@ -1,6 +1,6 @@
 package id
 
-case class UUID(msb: Long, lsb: Long):
+case class UUID(msb: Long, lsb: Long) derives CanEqual:
 
   import UUID.*
   import Variant.*

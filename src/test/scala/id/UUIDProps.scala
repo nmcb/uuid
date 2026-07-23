@@ -27,6 +27,9 @@ object UUIDProps extends Properties("uuid.UUID"):
       case Some(Version7)         =>  (msb & 0xF000L) == 0x7000L
       case Some(ISO3166Based)     =>  (msb & 0xF000L) == 0x8000L
       case None                   => ((msb & 0xF000L) == 0x0000L) || ((msb & 0xF000L) >= 0x7000L)
+      
+  property("equals") = forAll: (msb: Long, lsb: Long) =>
+    UUID(msb, lsb) == UUID(msb, lsb)
 
   property("iso3166") = forAll(isoSourcesAndTargets): (source: CountryCode, target: CountryCode) =>
       val uuid = UUID.iso3166(source, target)
