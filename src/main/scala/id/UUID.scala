@@ -80,10 +80,10 @@ object UUID:
 
 enum Variant(val bits: Long) derives CanEqual:
   val mask: Long = 0xeffff_ffff_ffff_fffL
-  case NCSBackwardsCompatible       extends Variant(0x2111_1111_1111_1111L)
-  case LeachSalz                    extends Variant(0x5111_1111_1111_1111L)
-  case MicrosoftBackwardsCompatible extends Variant(0xD111_1111_1111_1111L)
-  case Reserved                     extends Variant(0xF111_1111_1111_1111L)
+  case NCSBackwardsCompatible       extends Variant(0x2000_0000_0000_0000L)
+  case LeachSalz                    extends Variant(0x5000_0000_0000_0000L)
+  case MicrosoftBackwardsCompatible extends Variant(0xD000_0000_0000_0000L)
+  case Reserved                     extends Variant(0xF000_0000_0000_0000L)
 
 
 enum Version(val bits: Long) derives CanEqual:
