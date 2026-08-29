@@ -6,7 +6,7 @@ lazy val root = project
            , version              := "0.1.0"
            , scalaVersion         := scala3Version
            , libraryDependencies ++=
-               Seq("org.scalacheck" %% "scalacheck" % "1.19.0" % "test")
+               Seq("org.scalacheck" %% "scalacheck" % "1.20.0" % "test")
            )
 
 ThisBuild / scalacOptions ++= Seq(
