@@ -5,9 +5,10 @@ lazy val root = project
   .settings( name                 := "uuid"
            , version              := "0.1.0"
            , scalaVersion         := scala3Version
-           , libraryDependencies ++=
-               Seq("org.scalacheck" %% "scalacheck" % "1.20.0" % "test")
-           )
+           , libraryDependencies ++= Seq(
+               "org.scalatest"  %% "scalatest"  % "3.2.20" % "test",
+               "org.scalacheck" %% "scalacheck" % "1.20.0" % "test"
+           ))
 
 ThisBuild / scalacOptions ++= Seq(
   "-encoding", "utf8",
